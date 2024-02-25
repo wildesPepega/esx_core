@@ -20,7 +20,9 @@ body {
     transform: translate(-50%, -50%);
     background-color: #152029;
     border-radius: 10px;
-    box-shadow: 0 -5px 3px -3px #21303d, 0 5px 3px -3px #21303d;
+    box-shadow:
+        0 -5px 3px -3px #21303d,
+        0 5px 3px -3px #21303d;
     border: none;
     color: #ffffff;
 }

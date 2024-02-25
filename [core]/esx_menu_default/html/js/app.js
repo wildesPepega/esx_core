@@ -135,7 +135,7 @@
                 _name: name,
                 current: data,
                 elements: ESX_MENU.opened[namespace][name].elements,
-            })
+            }),
         );
     };
 
@@ -145,7 +145,7 @@
             JSON.stringify({
                 _namespace: namespace,
                 _name: name,
-            })
+            }),
         );
     };
 
@@ -157,7 +157,7 @@
                 _name: name,
                 current: data,
                 elements: ESX_MENU.opened[namespace][name].elements,
-            })
+            }),
         );
     };
 

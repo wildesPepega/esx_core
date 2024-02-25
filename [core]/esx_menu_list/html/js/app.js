@@ -142,7 +142,7 @@
                 _name: name,
                 data: data.data,
                 value: data.value,
-            })
+            }),
         );
     };
 
@@ -152,7 +152,7 @@
             JSON.stringify({
                 _namespace: namespace,
                 _name: name,
-            })
+            }),
         );
     };
 

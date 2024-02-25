@@ -110,7 +110,7 @@
                     .click(
                         function () {
                             ESX_MENU.submit(this.namespace, this.name, this.data);
-                        }.bind({ namespace: namespace, name: name, data: menuData })
+                        }.bind({ namespace: namespace, name: name, data: menuData }),
                     );
 
                 $(menu)
@@ -118,7 +118,7 @@
                     .click(
                         function () {
                             ESX_MENU.cancel(this.namespace, this.name, this.data);
-                        }.bind({ namespace: namespace, name: name, data: menuData })
+                        }.bind({ namespace: namespace, name: name, data: menuData }),
                     );
 
                 $(menu)
@@ -128,7 +128,7 @@
                         function () {
                             this.data.value = $(menu).find('[name="value"]').val();
                             ESX_MENU.change(this.namespace, this.name, this.data);
-                        }.bind({ namespace: namespace, name: name, data: menuData })
+                        }.bind({ namespace: namespace, name: name, data: menuData }),
                     );
 
                 if (typeof menuData.value != "undefined") {

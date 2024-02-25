@@ -24,7 +24,7 @@ function ESX.SpawnPlayer(skin, coords, cb)
         p:resolve()
     end)
     Citizen.Await(p)
-    
+
     local playerPed = PlayerPedId()
     FreezeEntityPosition(playerPed, true)
     SetEntityCoordsNoOffset(playerPed, coords.x, coords.y, coords.z, false, false, false, true)
@@ -34,7 +34,7 @@ function ESX.SpawnPlayer(skin, coords, cb)
     end
     FreezeEntityPosition(playerPed, false)
     NetworkResurrectLocalPlayer(coords.x, coords.y, coords.z, coords.heading, true, true, false)
-    TriggerEvent('playerSpawned', coords)
+    TriggerEvent("playerSpawned", coords)
     cb()
 end
 
@@ -56,7 +56,7 @@ AddEventHandler("esx:playerLoaded", function(xPlayer, _, skin)
     while not DoesEntityExist(ESX.PlayerData.ped) do
         Wait(20)
     end
-    
+
     ESX.PlayerLoaded = true
 
     local metadata = ESX.PlayerData.metadata
@@ -72,7 +72,7 @@ AddEventHandler("esx:playerLoaded", function(xPlayer, _, skin)
     local timer = GetGameTimer()
     while not HaveAllStreamingRequestsCompleted(ESX.PlayerData.ped) and (GetGameTimer() - timer) < 2000 do
         Wait(0)
-    end 
+    end
 
     if Config.EnablePVP then
         SetCanAttackFriendly(ESX.PlayerData.ped, true, false)
@@ -210,7 +210,6 @@ AddEventHandler("esx:playerLoaded", function(xPlayer, _, skin)
     SetDefaultVehicleNumberPlateTextPattern(-1, Config.CustomAIPlates)
     StartServerSyncLoops()
 end)
-
 
 RegisterNetEvent("esx:onPlayerLogout")
 AddEventHandler("esx:onPlayerLogout", function()
