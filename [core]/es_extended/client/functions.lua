@@ -57,7 +57,7 @@ function ESX.Progressbar(message, length, Options)
     print("[^1ERROR^7] ^5ESX Progressbar^7 is Missing!")
 end
 
-function   ESX.ShowNotification(message)
+function ESX.ShowNotification(message)
     SetNotificationTextEntry("STRING")
     AddTextComponentString(message)
     DrawNotification(0, 1)
