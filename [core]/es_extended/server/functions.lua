@@ -4,6 +4,24 @@ function ESX.Trace(msg)
     end
 end
 
+--- Triggers an event for one or more clients.
+---@param eventName string The name of the event to trigger.
+---@param playerIds table|number If a number, represents a single player ID. If a table, represents an array of player IDs.
+---@param ... any Additional arguments to pass to the event handler.
+function ESX.TriggerClientEvent(eventName, playerIds, ...)
+    if type(playerIds) == "number" then
+        TriggerClientEvent(eventName, playerIds, ...)
+        return
+    end
+
+    local payload = msgpack.pack_args(...)
+    local payloadLength = #payload
+
+    for i = 1, #playerIds do
+        TriggerClientEventInternal(eventName, playerIds[i], payload, payloadLength)
+    end
+end
+
 function ESX.RegisterCommand(name, group, cb, allowConsole, suggestion)
     if type(name) == "table" then
         for _, v in ipairs(name) do
@@ -106,13 +124,13 @@ function ESX.RegisterCommand(name, group, cb, allowConsole, suggestion)
                             elseif v.type == "any" then
                                 newArgs[v.name] = args[k]
                             elseif v.type == "merge" then
-                                local lenght = 0
+                                local length = 0
                                 for i = 1, k - 1 do
-                                    lenght = lenght + string.len(args[i]) + 1
+                                    length = length + string.len(args[i]) + 1
                                 end
                                 local merge = table.concat(args, " ")
 
-                                newArgs[v.name] = string.sub(merge, lenght)
+                                newArgs[v.name] = string.sub(merge, length)
                             elseif v.type == "coordinate" then
                                 local coord = tonumber(args[k]:match("(-?%d+%.?%d*)"))
                                 if not coord then
@@ -181,22 +199,26 @@ function Core.SavePlayer(xPlayer, cb)
         xPlayer.job.name,
         xPlayer.job.grade,
         xPlayer.group,
-        json.encode(xPlayer.getCoords()),
+        json.encode(xPlayer.getCoords(false, true)),
         json.encode(xPlayer.getInventory(true)),
         json.encode(xPlayer.getLoadout(true)),
         json.encode(xPlayer.getMeta()),
         xPlayer.identifier,
     }
 
-    MySQL.prepare("UPDATE `users` SET `accounts` = ?, `job` = ?, `job_grade` = ?, `group` = ?, `position` = ?, `inventory` = ?, `loadout` = ?, `metadata` = ? WHERE `identifier` = ?", parameters, function(affectedRows)
-        if affectedRows == 1 then
-            print(('[^2INFO^7] Saved player ^5"%s^7"'):format(xPlayer.name))
-            TriggerEvent("esx:playerSaved", xPlayer.playerId, xPlayer)
+    MySQL.prepare(
+        "UPDATE `users` SET `accounts` = ?, `job` = ?, `job_grade` = ?, `group` = ?, `position` = ?, `inventory` = ?, `loadout` = ?, `metadata` = ? WHERE `identifier` = ?",
+        parameters,
+        function(affectedRows)
+            if affectedRows == 1 then
+                print(('[^2INFO^7] Saved player ^5"%s^7"'):format(xPlayer.name))
+                TriggerEvent("esx:playerSaved", xPlayer.playerId, xPlayer)
+            end
+            if cb then
+                cb()
+            end
         end
-        if cb then
-            cb()
-        end
-    end)
+    )
 end
 
 function Core.SavePlayers(cb)
@@ -223,17 +245,21 @@ function Core.SavePlayers(cb)
         }
     end
 
-    MySQL.prepare("UPDATE `users` SET `accounts` = ?, `job` = ?, `job_grade` = ?, `group` = ?, `position` = ?, `inventory` = ?, `loadout` = ?, `metadata` = ? WHERE `identifier` = ?", parameters, function(results)
-        if not results then
-            return
-        end
+    MySQL.prepare(
+        "UPDATE `users` SET `accounts` = ?, `job` = ?, `job_grade` = ?, `group` = ?, `position` = ?, `inventory` = ?, `loadout` = ?, `metadata` = ? WHERE `identifier` = ?",
+        parameters,
+        function(results)
+            if not results then
+                return
+            end
 
-        if type(cb) == "function" then
-            return cb()
-        end
+            if type(cb) == "function" then
+                return cb()
+            end
 
-        print(("[^2INFO^7] Saved ^5%s^7 %s over ^5%s^7 ms"):format(#parameters, #parameters > 1 and "players" or "player", ESX.Math.Round((os.time() - startTime) / 1000000, 2)))
-    end)
+            print(("[^2INFO^7] Saved ^5%s^7 %s over ^5%s^7 ms"):format(#parameters, #parameters > 1 and "players" or "player", ESX.Math.Round((os.time() - startTime) / 1000000, 2)))
+        end
+    )
 end
 
 ESX.GetPlayers = GetPlayers
@@ -398,37 +424,6 @@ function ESX.DiscordLogFields(name, title, color, fields)
     )
 end
 
---- Create Job at Runtime
---- @param name string
---- @param label string
---- @param grades table
-function ESX.CreateJob(name, label, grades)
-    if not name then
-        return print("[^3WARNING^7] missing argument `name(string)` while creating a job")
-    end
-
-    if not label then
-        return print("[^3WARNING^7] missing argument `label(string)` while creating a job")
-    end
-
-    if not grades or not next(grades) then
-        return print("[^3WARNING^7] missing argument `grades(table)` while creating a job!")
-    end
-
-    local parameters = {}
-    local job = { name = name, label = label, grades = {} }
-
-    for _, v in pairs(grades) do
-        job.grades[tostring(v.grade)] = { job_name = name, grade = v.grade, name = v.name, label = v.label, salary = v.salary, skin_male = v.skin_male or "{}", skin_female = v.skin_female or "{}" }
-        parameters[#parameters + 1] = { name, v.grade, v.name, v.label, v.salary, v.skin_male or "{}", v.skin_female or "{}" }
-    end
-
-    MySQL.insert("INSERT IGNORE INTO jobs (name, label) VALUES (?, ?)", { name, label })
-    MySQL.prepare("INSERT INTO job_grades (job_name, grade, name, label, salary, skin_male, skin_female) VALUES (?, ?, ?, ?, ?, ?, ?)", parameters)
-
-    ESX.Jobs[name] = job
-end
-
 function ESX.RefreshJobs()
     local Jobs = {}
     local jobs = MySQL.query.await("SELECT * FROM jobs")
@@ -541,15 +536,7 @@ if not Config.OxInventory then
 end
 
 function ESX.DoesJobExist(job, grade)
-    grade = tostring(grade)
-
-    if job and grade then
-        if ESX.Jobs[job] and ESX.Jobs[job].grades[grade] then
-            return true
-        end
-    end
-
-    return false
+    return (ESX.Jobs[job] and ESX.Jobs[job].grades[tostring(grade)] ~= nil) or false
 end
 
 function Core.IsPlayerAdmin(playerId)
