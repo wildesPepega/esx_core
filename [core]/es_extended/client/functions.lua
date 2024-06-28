@@ -505,7 +505,7 @@ function ESX.Game.GetClosestEntity(entities, isPlayerEntities, coords, modelFilt
 
     if modelFilter then
         filteredEntities = {}
-    
+
         for currentEntityIndex = 1, #entities do
             if modelFilter[GetEntityModel(entities[currentEntityIndex])] then
                 filteredEntities[#filteredEntities + 1] = entities[currentEntityIndex]
@@ -575,13 +575,11 @@ function ESX.Game.GetVehicleProperties(vehicle)
 
     local doorsBroken, windowsBroken, tyreBurst = {}, {}, {}
 
+    local wheel_count = GetVehicleNumberOfWheels(vehicle)
 
-    local wheel_count = GetVehicleNumberOfWheels(vehicle);
-    
     for wheel_index = 0, wheel_count - 1 do
         tyreBurst[tostring(wheel_index)] = IsVehicleTyreBurst(vehicle, wheel_index, false)
     end
-
 
     for windowId = 0, 7 do -- 13
         RollUpWindow(vehicle, windowId) --fix when you put the car away with the window down

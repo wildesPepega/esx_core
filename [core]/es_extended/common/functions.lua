@@ -109,7 +109,9 @@ end
 
 function ESX.ValidateType(value, ...)
     local types = { ... }
-    if #types == 0 then return true end
+    if #types == 0 then
+        return true
+    end
 
     local mapType = {}
     for i = 1, #types, 1 do

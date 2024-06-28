@@ -1,6 +1,6 @@
 ESX = exports["es_extended"]:getSharedObject()
 
-OnPlayerData = function (key, val, last) end
+OnPlayerData = function(key, val, last) end
 
 if not IsDuplicityVersion() then -- Only register this event for the client
     AddEventHandler("esx:setPlayerData", function(key, val, last)

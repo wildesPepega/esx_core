@@ -30,7 +30,9 @@ local function ToggleVehicleStatus(inVehicle, seat)
 end
 
 CreateThread(function()
-    while not ESX.PlayerLoaded do Wait(200) end
+    while not ESX.PlayerLoaded do
+        Wait(200)
+    end
     while true do
         ESX.SetPlayerData("coords", GetEntityCoords(playerPed))
         if playerPed ~= PlayerPedId() then
@@ -95,7 +97,7 @@ CreateThread(function()
                 TriggerServerEvent("esx:exitedVehicle", current.plate, current.seat, current.displayName, current.netId)
                 isInVehicle = false
                 current = {}
-                ToggleVehicleStatus(false,false)
+                ToggleVehicleStatus(false, false)
             end
         end
         Wait(200)

@@ -34,7 +34,7 @@ function ESX.SpawnPlayer(skin, coords, cb)
     end
     FreezeEntityPosition(playerPed, false)
     NetworkResurrectLocalPlayer(coords.x, coords.y, coords.z, coords.heading, true, true, false)
-    TriggerEvent('playerSpawned', coords)
+    TriggerEvent("playerSpawned", coords)
     cb()
 end
 
@@ -210,7 +210,6 @@ AddEventHandler("esx:playerLoaded", function(xPlayer, _, skin)
     SetDefaultVehicleNumberPlateTextPattern(-1, Config.CustomAIPlates)
     StartServerSyncLoops()
 end)
-
 
 RegisterNetEvent("esx:onPlayerLogout")
 AddEventHandler("esx:onPlayerLogout", function()
